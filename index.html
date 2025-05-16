@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troca Ecológica - Óleo por Sabão</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Estilos do Login/Cadastro */
+        .auth-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 50px auto;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .auth-form button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        /* Estilos do Dashboard */
+        .dashboard {
+            display: none;
+        }
+
+        .offer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .offer-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+
+        /* Estilos do Chat */
+        .chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 8px;
+            margin-right: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Formulário de Login/Cadastro -->
+        <div class="auth-form">
+            <h2>Login/Cadastro</h2>
+            <input type="text" id="username" placeholder="Nome de usuário">
+            <input type="password" id="password" placeholder="Senha">
+            <button onclick="login()">Entrar / Cadastrar</button>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard">
+            <h2>Ofertas Disponíveis</h2>
+            <button onclick="showChat()">Abrir Chat</button>
+            <button onclick="logout()">Sair</button>
+            
+            <div class="offer-grid" id="offers">
+                <!-- Ofertas serão adicionadas via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Digite sua mensagem">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        // Simulação de banco de dados
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let offers = JSON.parse(localStorage.getItem('offers')) || [];
+        let currentUser = null;
+        let chatPartner = null;
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Verifica se o usuário existe
+            const user = users.find(u => u.username === username);
+            
+            if(user) {
+                if(user.password === password) {
+                    currentUser = user;
+                    showDashboard();
+                } else {
+                    alert('Senha incorreta!');
+                }
+            } else {
+                // Cria novo usuário
+                const newUser = { username, password };
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                currentUser = newUser;
+                showDashboard();
+            }
+        }
+
+        function showDashboard() {
+            document.querySelector('.auth-form').style.display = 'none';
+            document.querySelector('.dashboard').style.display = 'block';
+            loadOffers();
+        }
+
+        function logout() {
+            currentUser = null;
+            location.reload();
+        }
+
+        function loadOffers() {
+            const offersGrid = document.getElementById('offers');
+            offersGrid.innerHTML = offers.map(offer => `
+                <div class="offer-card">
+                    <h3>${offer.user}</h3>
+                    <p>Oferece: ${offer.quantity}L de óleo</p>
+                    <p>Por: ${offer.soap} barras de sabão</p>
+                    <button onclick="startChat('${offer.user}')">Negociar</button>
+                </div>
+            `).join('');
+        }
+
+        function startChat(user) {
+            chatPartner = user;
+            document.getElementById('chatContainer').style.display = 'block';
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value;
+            
+            if(message) {
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.innerHTML += `
+                    <div><strong>${currentUser.username}:</strong> ${message}</div>
+                `;
+                messageInput.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        function showChat() {
+            document.getElementById('chatContainer').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
